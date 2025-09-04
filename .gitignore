@@ -1,0 +1,53 @@
+# -----------------------
+# Python
+# -----------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+pip-wheel-metadata/
+
+# Virtualenv
+.venv/
+venv/
+env/
+ENV/
+.venv*/
+env*/
+venv*/
+
+# IDEs e editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arquivos temporários
+*.log
+*.tmp
+*.cache
+.DS_Store
+Thumbs.db
+
+# -----------------------
+# Flask / SQLAlchemy
+# -----------------------
+instance/
+*.db
+*.sqlite
+*.sqlite3
+migrations/
+
+# -----------------------
+# Configurações sensíveis
+# -----------------------
+.env
+.env.*
+!.env.example

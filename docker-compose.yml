@@ -1,0 +1,70 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: catalogo_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT:-5000}:5000"
+    volumes:
+      - ./:/app
+    command: >
+      sh -c "flask db upgrade &&
+             flask run --host=0.0.0.0 --port=5000"
+    networks:
+      - app_net
+
+  db:
+    image: mysql:8.0
+    container_name: catalogo_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: ${TZ:-America/Sao_Paulo}
+    ports:
+      - "3306:3306"
+    command: [
+      "--character-set-server=utf8mb4",
+      "--collation-server=utf8mb4_0900_ai_ci",
+      "--default-authentication-plugin=caching_sha2_password"
+    ]
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u ${MYSQL_USER} --password=${MYSQL_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - app_net
+
+  adminer:
+    image: adminer:latest
+    container_name: catalogo_adminer
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_started
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+      TZ: ${TZ:-America/Sao_Paulo}
+    ports:
+      - "8080:8080"
+    networks:
+      - app_net
+
+networks:
+  app_net:
+
+volumes:
+  mysql_data:
