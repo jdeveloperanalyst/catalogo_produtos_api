@@ -1,33 +1,61 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.controllers.product_controller import (
-    list_products, create_product, update_product, delete_product
-)
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from app.controllers import product_controller
 
-product_routes = Blueprint("product_routes", __name__)
+product_bp = Blueprint("products", __name__)
 
-@product_routes.route("/products", methods=["GET"])
+@product_bp.route("/", methods=["GET"])
+def welcome():
+    return jsonify("Bem vindo à API Catalogo de Produtos"), 200
+
+@product_bp.route("/products", methods=["GET"])
 @jwt_required()
-def get_products():
-    return jsonify(*list_products())
+def list_products():
+    return jsonify(product_controller.list_products()[0]), 200
 
 
-@product_routes.route("/products", methods=["POST"])
+@product_bp.route("/products", methods=["POST"])
 @jwt_required()
-def new_product():
-    user = get_jwt_identity()
-    return jsonify(*create_product(user, request.get_json()))
+def create_product():
+    data = request.get_json()
+    identity = get_jwt_identity()
+    claims = get_jwt()
+
+    user = {
+        "id": int(identity),
+        "role": claims.get("role"),
+        "username": claims.get("username"),
+    }
+
+    return product_controller.create_product(user, data)
 
 
-@product_routes.route("/products/<int:product_id>", methods=["PUT"])
+@product_bp.route("/<int:product_id>", methods=["PUT"])
 @jwt_required()
-def edit_product(product_id):
-    user = get_jwt_identity()
-    return jsonify(*update_product(user, product_id, request.get_json()))
+def update_product(product_id):
+    data = request.get_json()
+    identity = get_jwt_identity()
+    claims = get_jwt()
+
+    user = {
+        "id": int(identity),
+        "role": claims.get("role"),
+        "username": claims.get("username"),
+    }
+
+    return product_controller.update_product(user, product_id, data)
 
 
-@product_routes.route("/products/<int:product_id>", methods=["DELETE"])
+@product_bp.route("/<int:product_id>", methods=["DELETE"])
 @jwt_required()
-def remove_product(product_id):
-    user = get_jwt_identity()
-    return jsonify(*delete_product(user, product_id))
+def delete_product(product_id):
+    identity = get_jwt_identity()
+    claims = get_jwt()
+
+    user = {
+        "id": int(identity),
+        "role": claims.get("role"),
+        "username": claims.get("username"),
+    }
+
+    return product_controller.delete_product(user, product_id)

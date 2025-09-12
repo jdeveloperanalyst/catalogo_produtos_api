@@ -10,7 +10,11 @@ def list_products():
 
 
 def create_product(user, data):
-    product = Product(name=data["name"], description=data.get("description"), created_by=user["id"])
+    product = Product(
+        name=data["name"],
+        description=data.get("description"),
+        created_by=user["id"]
+    )
     db.session.add(product)
     db.session.commit()
     return {"message": "Produto criado com sucesso"}, 201
@@ -18,6 +22,7 @@ def create_product(user, data):
 
 def update_product(user, product_id, data):
     product = Product.query.get_or_404(product_id)
+
     if user["role"] != "admin" and product.created_by != user["id"]:
         return {"error": "Você não tem permissão para editar este produto"}, 403
 
@@ -29,6 +34,7 @@ def update_product(user, product_id, data):
 
 def delete_product(user, product_id):
     product = Product.query.get_or_404(product_id)
+
     if user["role"] != "admin" and product.created_by != user["id"]:
         return {"error": "Você não tem permissão para excluir este produto"}, 403
 
