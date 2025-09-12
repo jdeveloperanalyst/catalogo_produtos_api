@@ -1,20 +1,11 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_jwt_extended import JWTManager
-from flask_bcrypt import Bcrypt
 import logging
-
+from app.extensions import db, migrate, jwt, bcrypt
 from app.config import Config
-from app.views.auth_routes import auth_bp
-from app.views.user_routes import user_bp
-from app.views.product_routes import product_bp
+from app.views.auth_routes import auth_routes
+from app.views.user_routes import user_routes
+from app.views.product_routes import product_routes
 
-# Inicialização das extensões
-db = SQLAlchemy()
-migrate = Migrate()
-jwt = JWTManager()
-bcrypt = Bcrypt()
 
 def create_app():
     app = Flask(__name__)
@@ -27,9 +18,9 @@ def create_app():
     bcrypt.init_app(app)
 
     # Registro das rotas
-    app.register_blueprint(auth_bp, url_prefix="/auth")
-    app.register_blueprint(user_bp, url_prefix="/users")
-    app.register_blueprint(product_bp, url_prefix="/products")
+    app.register_blueprint(auth_routes, url_prefix="/auth")
+    app.register_blueprint(user_routes, url_prefix="/users")
+    app.register_blueprint(product_routes)
 
     # Configuração de log
     logging.basicConfig(level=logging.INFO)
